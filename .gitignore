@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# State and runtime files
+*.tmp
+*.log
+subsonic_state*.json
+
+# Local configurations
+config.json
+
+# Build and package artifacts
+build/
+dist/
+*.rpm
+*.tar.gz
+*.egg-info/
+
+# Editor and tools
+.vscode/
+.idea/
+.omo/
+.reasonix/
+*.swp
+*~

@@ -1,0 +1,6 @@
+{
+  "server_url": "http://your-server:4533",
+  "username": "your-username",
+  "password": "your-password",
+  "state_file": "/tmp/subsonic_state.json"
+}

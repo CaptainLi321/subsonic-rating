@@ -1,0 +1,32 @@
+[Desktop Entry]
+Name=Subsonic Rating
+Comment=Rate the currently playing song in Subsonic/Navidrome
+Exec=subsonic-rate
+Icon=audio-x-generic
+Type=Application
+Categories=AudioVideo;Audio;
+Actions=rate0;rate1;rate2;rate3;rate4;rate5;
+
+[Desktop Action rate0]
+Name=Cancel Rating (0 Stars)
+Exec=subsonic-rate 0
+
+[Desktop Action rate1]
+Name=Rate 1 Star
+Exec=subsonic-rate 1
+
+[Desktop Action rate2]
+Name=Rate 2 Stars
+Exec=subsonic-rate 2
+
+[Desktop Action rate3]
+Name=Rate 3 Stars
+Exec=subsonic-rate 3
+
+[Desktop Action rate4]
+Name=Rate 4 Stars
+Exec=subsonic-rate 4
+
+[Desktop Action rate5]
+Name=Rate 5 Stars
+Exec=subsonic-rate 5

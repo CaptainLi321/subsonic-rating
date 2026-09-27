@@ -1,0 +1,73 @@
+name: Build and Release RPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-rpm:
+    name: Build RPM on Fedora
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:43
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install RPM build tools and dependencies
+        run: |
+          dnf install -y rpm-build rpmdevtools tar gzip git python3 python3-requests
+
+      - name: Prepare rpmbuild environment and source tarball
+        run: |
+          SPEC_VER=$(grep -E "^Version:" subsonic-rating.spec | awk '{print $2}')
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            if [ "${VERSION}" != "${SPEC_VER}" ]; then
+              echo "ERROR: Git tag version (${VERSION}) does not match spec Version (${SPEC_VER})" >&2
+              exit 1
+            fi
+          else
+            VERSION="${SPEC_VER}"
+          fi
+          echo "Building version: ${VERSION}"
+
+          # Setup standard rpmbuild tree
+          rpmdev-setuptree
+          cp subsonic-rating.spec "${HOME}/rpmbuild/SPECS/"
+
+          # Package source files into tarball
+          SRC_DIR="/tmp/subsonic-rating-${VERSION}"
+          mkdir -p "${SRC_DIR}"
+          cp -r subsonic_daemon.py subsonic_rate.py subsonic_common.py \
+                subsonic-watcher.service subsonic-rating.desktop \
+                config.example.json README.md LICENSE "${SRC_DIR}/"
+
+          tar -czvf "${HOME}/rpmbuild/SOURCES/subsonic-rating-${VERSION}.tar.gz" -C /tmp "subsonic-rating-${VERSION}"
+
+      - name: Build RPM package
+        run: |
+          rpmbuild -ba "${HOME}/rpmbuild/SPECS/subsonic-rating.spec"
+          mkdir -p dist
+          cp "${HOME}/rpmbuild/RPMS/noarch/"*.rpm dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: subsonic-rating-rpm
+          path: dist/*.rpm
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.rpm
+          generate_release_notes: true
